@@ -83,7 +83,6 @@ of the necessary SQL tables for your database.
 def parseJson(json_file):
     with open(json_file, 'r') as f:
         items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
-
         for item in items:
             global Items_s
             global Category_s
@@ -91,36 +90,52 @@ def parseJson(json_file):
             global Users_s
             global Users_d
 
-
             #create Items String
-            Items_s += item['ItemID'] + '|' + '\"' + item['Name'] + '\"' + '|' + transformDollar(item['Currently']) + '|'
+            name = item['Name']
+            name = name.replace('"','""')
+            
+            Items_s += item['ItemID'] + '|' + '"' + name + '"' + '|' + transformDollar(item['Currently']) + '|'
             try:
                 Items_s += transformDollar(item['Buy_Price']) + '|'
             except KeyError:
                 Items_s += '\"NULL\"' + '|'
-            Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '\"' + item['Seller']['UserID'] + '\"' + '\n'
+
+            seller = item['Seller']['UserID']
+            seller = seller.replace('"','""')
+            Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '"' + seller + '"' + '\n'
 
             #create Category String and Users String
             for categories in item['Category']:
-                Category_s += item['ItemID'] + '|' + '\"' + categories + '\"' + '\n'
+                categories = categories.replace('"','""')
+                Category_s += item['ItemID'] + '|' + '"' + categories + '"' + '\n'
 
             #create Bids String
             if item['Number_of_Bids'] == '0':
                 Bid_s +=item['ItemID'] + '|' + '\"NULL\"' + '\n'
             else:
                 for bid in item['Bids']:
-                    Bid_s += item['ItemID'] + '|' + '\"' + bid['Bid']['Bidder']['UserID'] + '\"' + '|' + transformDttm(bid['Bid']['Time']) + '|' + transformDollar(bid['Bid']['Amount']) + '\n'
+                    bidder = bid['Bid']['Bidder']['UserID']
+                    bidder = bidder.replace('"','""')
+                    Bid_s += item['ItemID'] + '|' + '"' + bidder + '"' + '|' + transformDttm(bid['Bid']['Time']) + '|' + transformDollar(bid['Bid']['Amount']) + '\n'
                     if Users_d.has_key(bid['Bid']['Bidder']['UserID']):
                         pass
                     else:
                         try:
-                            Users_d[bid['Bid']['Bidder']['UserID']] = '\"' + bid['Bid']['Bidder']['Location'] + '\"' + '|' + '\"' + bid['Bid']['Bidder']['Country'] + '\"' + '|' + bid['Bid']['Bidder']['Rating']
+                            location = bid['Bid']['Bidder']['Location']
+                            location = location.replace('"','""')
+                            country = bid['Bid']['Bidder']['Country']
+                            country = country.replace('"','""')
+                            Users_d[bid['Bid']['Bidder']['UserID']] = '"' + location + '"' + '|' + '"' + country + '"' + '|' + bid['Bid']['Bidder']['Rating']
                         except KeyError:
-                                try:
-                                    Users_d[bid['Bid']['Bidder']['UserID']] = '\"NULL\"' + '|' + '\"' + bid['Bid']['Bidder']['Country'] + '\"' + '|' + bid['Bid']['Bidder']['Rating']
+                                try:   
+                                    country = bid['Bid']['Bidder']['Country']
+                                    country = country.replace('"','""')
+                                    Users_d[bid['Bid']['Bidder']['UserID']] = '\"NULL\"' + '|' + '"' + country + '"' + '|' + bid['Bid']['Bidder']['Rating']
                                 except KeyError:
                                     try:
-                                        Users_d[bid['Bid']['Bidder']['UserID']] = '\"' + bid['Bid']['Bidder']['Location'] + '\"' + '|' + '\'NULL\'' + '|' + bid['Bid']['Bidder']['Rating']
+                                        location = bid['Bid']['Bidder']['Location']
+                                        location = location.replace('"','""')
+                                        Users_d[bid['Bid']['Bidder']['UserID']] = '"' + location + '"' + '|' + '\'NULL\'' + '|' + bid['Bid']['Bidder']['Rating']
                                     except:
                                         Users_d[bid['Bid']['Bidder']['UserID']] = '\"NULL\"' + '|' + '\"NULL\"' + '|' + bid['Bid']['Bidder']['Rating']
 
@@ -132,7 +147,9 @@ def parseJson(json_file):
                 pass
             else:
                 Users_d[item['Seller']['UserID']] = '\"NULL\"' + '|' + '\"NULL\"' + '|' + item['Seller']['Rating']
-                Users_s += '\"' + item['Seller']['UserID'] + '\"' + '|' + '\"NULL\"' + '|' + '\"NULL\"' + '|' + item['Seller']['Rating'] + '\n'
+                seller = item['Seller']['UserID']
+                seller = seller.replace('"','""')
+                Users_s += '"' + seller + '"' + '|' + '\"NULL\"' + '|' + '\"NULL\"' + '|' + item['Seller']['Rating'] + '\n'
 
 
 
@@ -142,9 +159,11 @@ to the parser
 """
 def main(argv):
 
-    #if len(argv) < 2:
-     #   print >> sys.stderr, 'Usage: python skeleton_json_parser.py <path to json files>'
-      #  sys.exit(1)
+    argv = ["8","8","ebay_data/items-0.json"]
+
+    if len(argv) < 2:
+        print >> sys.stderr, 'Usage: python skeleton_json_parser.py <path to json files>'
+        sys.exit(1)
 
     # loops over all .json files in the argument
     for f in argv[1:]:
