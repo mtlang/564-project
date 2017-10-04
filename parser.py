@@ -106,11 +106,16 @@ def parseJson(json_file):
             location = location.replace('"', '""')
             country = item['Country']
             country = country.replace('"', '""')
-            description = item['Description']
-            description = description.replace('"', '""')
+            description = item['Description']                
         
             Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '"' + seller + '"'
-            Items_s += location + '|' + country + '|' + description + '\n'
+            Items_s += location + '|' + country + '|'
+        
+            try:
+                description = description.replace('"', '""')
+                Items_s += description + '\n'
+            except:
+                Items_s += '\"NULL\"' + '\n'
         
             #create Category String and Users String
             for categories in item['Category']:
