@@ -102,8 +102,16 @@ def parseJson(json_file):
 
             seller = item['Seller']['UserID']
             seller = seller.replace('"','""')
-            Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '"' + seller + '"' + '\n'
-
+            location = item['Location']
+            location = location.replace('"', '""')
+            country = item['Country']
+            country = country.replace('"', '""')
+            description = item['Description']
+            description = description.replace('"', '""')
+        
+            Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '"' + seller + '"'
+            Items_s += location + '|' + country + '|' + description + '\n'
+        
             #create Category String and Users String
             for categories in item['Category']:
                 categories = categories.replace('"','""')
@@ -174,11 +182,11 @@ def main(argv):
     file.write(Items_s)
     file.close()
 
-    file = open('Category.dat', 'w')
+    file = open('Categories.dat', 'w')
     file.write(Category_s)
     file.close()
 
-    file = open('User.dat', 'w')
+    file = open('Users.dat', 'w')
     file.write(Users_s)
     file.close()
 
