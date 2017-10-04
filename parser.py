@@ -110,9 +110,7 @@ def parseJson(json_file):
                 Category_s += item['ItemID'] + '|' + '"' + categories + '"' + '\n'
 
             #create Bids String
-            if item['Number_of_Bids'] == '0':
-                Bid_s +=item['ItemID'] + '|' + '\"NULL\"' + '\n'
-            else:
+            if item['Number_of_Bids'] != '0':
                 for bid in item['Bids']:
                     bidder = bid['Bid']['Bidder']['UserID']
                     bidder = bidder.replace('"','""')
