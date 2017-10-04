@@ -33,7 +33,7 @@ Items_s = ""
 Category_s = ""
 Bid_s = ""
 Users_s = ""
-Users_d = {}
+
 
 # Dictionary of months used for date transformation
 MONTHS = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06',\
@@ -88,7 +88,7 @@ def parseJson(json_file):
             global Category_s
             global Bid_s
             global Users_s
-            global Users_d
+            Users_d = {}
 
             #create Items String
             name = item['Name']
@@ -108,12 +108,12 @@ def parseJson(json_file):
             country = country.replace('"', '""')
             description = item['Description']                
         
-            Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '"' + seller + '"'
-            Items_s += location + '|' + country + '|'
+            Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '"' + seller + '"' + '|'
+            Items_s += '"' + location + '"' + '|' + '"' + country + '"' + '|'
         
             try:
                 description = description.replace('"', '""')
-                Items_s += description + '\n'
+                Items_s += '"' + description + '"' + '\n'
             except:
                 Items_s += '\"NULL\"' + '\n'
         
@@ -161,16 +161,14 @@ def parseJson(json_file):
                 seller = item['Seller']['UserID']
                 seller = seller.replace('"','""')
                 Users_s += '"' + seller + '"' + '|' + '\"NULL\"' + '|' + '\"NULL\"' + '|' + item['Seller']['Rating'] + '\n'
-
-
+    f.close()
+    
 
 """
 Loops through each json files provided on the command line and passes each file
 to the parser
 """
 def main(argv):
-
-    argv = ["8","8","ebay_data/items-0.json"]
 
     if len(argv) < 2:
         print >> sys.stderr, 'Usage: python skeleton_json_parser.py <path to json files>'
