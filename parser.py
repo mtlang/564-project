@@ -5,10 +5,8 @@ FILE: skeleton_parser.py
 Author: Firas Abuzaid (fabuzaid@stanford.edu)
 Author: Perth Charernwattanagul (puch@stanford.edu)
 Modified: 04/21/2014
-
 Skeleton parser for CS564 programming project 1. Has useful imports and
 functions for parsing, including:
-
 1) Directory handling -- the parser takes a list of eBay json files
 and opens each file inside of a loop. You just need to fill in the rest.
 2) Dollar value conversions -- the json files store dollar value amounts in
@@ -17,7 +15,6 @@ like XXXXX.xx.
 3) Date/time conversions -- the json files store dates/ times in the form
 Mon-DD-YY HH:MM:SS -- we wrote a function (transformDttm) that converts to the
 for YYYY-MM-DD HH:MM:SS, which will sort chronologically in SQL.
-
 Your job is to implement the parseJson function, which is invoked on each file by
 the main function. We create the initial Python dictionary object of items for
 you; the rest is up to you!
@@ -33,6 +30,7 @@ Items_s = ""
 Category_s = ""
 Bid_s = ""
 Users_s = ""
+Users_d = {}
 
 
 # Dictionary of months used for date transformation
@@ -88,12 +86,13 @@ def parseJson(json_file):
             global Category_s
             global Bid_s
             global Users_s
-            Users_d = {}
+            global Users_d
+            Category_d = {}
 
             #create Items String
             name = item['Name']
             name = name.replace('"','""')
-            
+
             Items_s += item['ItemID'] + '|' + '"' + name + '"' + '|' + transformDollar(item['Currently']) + '|'
             try:
                 Items_s += transformDollar(item['Buy_Price']) + '|'
@@ -106,21 +105,26 @@ def parseJson(json_file):
             location = location.replace('"', '""')
             country = item['Country']
             country = country.replace('"', '""')
-            description = item['Description']                
-        
+            description = item['Description']
+
             Items_s += transformDollar(item['First_Bid']) + '|' + item['Number_of_Bids'] + '|' + transformDttm(item['Started']) + '|' + transformDttm(item['Ends'])+ '|' + '"' + seller + '"' + '|'
             Items_s += '"' + location + '"' + '|' + '"' + country + '"' + '|'
-        
+
             try:
                 description = description.replace('"', '""')
                 Items_s += '"' + description + '"' + '\n'
             except:
                 Items_s += '\"NULL\"' + '\n'
-        
+                
             #create Category String and Users String
             for categories in item['Category']:
                 categories = categories.replace('"','""')
-                Category_s += item['ItemID'] + '|' + '"' + categories + '"' + '\n'
+                if Category_d.has_key(categories):
+                    pass
+                else:
+                    Category_d[categories] = item['ItemID']
+                    Category_s += item['ItemID'] + '|' + '"' + categories + '"' + '\n'
+                
 
             #create Bids String
             if item['Number_of_Bids'] != '0':
@@ -138,7 +142,7 @@ def parseJson(json_file):
                             country = country.replace('"','""')
                             Users_d[bid['Bid']['Bidder']['UserID']] = '"' + location + '"' + '|' + '"' + country + '"' + '|' + bid['Bid']['Bidder']['Rating']
                         except KeyError:
-                                try:   
+                                try:
                                     country = bid['Bid']['Bidder']['Country']
                                     country = country.replace('"','""')
                                     Users_d[bid['Bid']['Bidder']['UserID']] = '\"NULL\"' + '|' + '"' + country + '"' + '|' + bid['Bid']['Bidder']['Rating']
@@ -157,12 +161,16 @@ def parseJson(json_file):
             if Users_d.has_key(item['Seller']['UserID']):
                 pass
             else:
-                Users_d[item['Seller']['UserID']] = '\"NULL\"' + '|' + '\"NULL\"' + '|' + item['Seller']['Rating']
+                location = item['Location']
+                location = location.replace('"', '""')
+                country = item['Country']
+                country = country.replace('"', '""')
+                Users_d[item['Seller']['UserID']] = '"' + location + '"' + '|' + '"' +  country + '"' + '|' + item['Seller']['Rating']
                 seller = item['Seller']['UserID']
                 seller = seller.replace('"','""')
-                Users_s += '"' + seller + '"' + '|' + '\"NULL\"' + '|' + '\"NULL\"' + '|' + item['Seller']['Rating'] + '\n'
+                Users_s += '"' + seller + '"' + '|' + '"' + location + '"' + '|' + '"' + location + '"' + '|' + item['Seller']['Rating'] + '\n'
     f.close()
-    
+
 
 """
 Loops through each json files provided on the command line and passes each file
