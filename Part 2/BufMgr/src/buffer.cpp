@@ -36,6 +36,20 @@ BufMgr::BufMgr(std::uint32_t bufs)
 
 
 BufMgr::~BufMgr() {
+	// Flush dirty pages
+	for (int i = 0; i < numBufs; i++)
+	{
+		if (bufDescTable[i].dirty) 
+		{
+			File->writePage(&bufPool[i]);
+			bufDescTable[i].dirty = false;
+		}
+	}
+	
+	// Deallocate bufPool and bufDescTable
+	delete bufPool;
+	delete bufDescTable;
+	
 }
 
 void BufMgr::advanceClock()
@@ -63,11 +77,35 @@ void BufMgr::flushFile(const File* file)
 
 void BufMgr::allocPage(File* file, PageId &pageNo, Page*& page) 
 {
+	// Allocate an empty page
+	Page newPage = file->allocatePage();
+	
+	// Obtain a buffer pool frame
+	FrameId bufFrame;
+	allocBuf(&bufFrame);
+	
+	// Insert entry into hash table
+	hashTable.insert(file, *pageNo, bufFrame);
+	
+	// Set up frame
+	bufDescTable[bufFrame].Set(file, *pageNo);
+	
 }
 
 void BufMgr::disposePage(File* file, const PageId PageNo)
 {
-    
+	Page * toDispose = file->readPage(PageNo, false);
+    // If page is in buffer pool...
+	Page * inPool = std::find(std::begin(bufPool), std::end(bufPool), *toDispose);
+	if (inPool != std::end(bufPool)) 
+	{
+		// Free page from pool
+		*inPool = null;
+		// Remove page from hash table
+		hashTable.remove(file,PageNo);
+	}
+	// Delete page from file
+	file->deletePage(PageNo);
 }
 
 void BufMgr::printSelf(void) 
