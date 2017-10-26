@@ -37,11 +37,11 @@ BufMgr::BufMgr(std::uint32_t bufs)
 
 BufMgr::~BufMgr() {
 	// Flush dirty pages
-	for (int i = 0; i < numBufs; i++)
+	for (std::uint32_t i = 0; i < numBufs; i++)
 	{
 		if (bufDescTable[i].dirty)
 		{
-			File->writePage(&bufPool[i]);
+			bufDescTable[i].file->writePage(bufPool[i]);
 			bufDescTable[i].dirty = false;
 		}
 	}
@@ -114,7 +114,6 @@ void BufMgr::unPinPage(File* file, const PageId pageNo, const bool dirty)
 {
 	//check if page exists in bufferpool
 	FrameId clockStart = clockHand;
-	FrameId frame;
 	bool notFound;
 	while (bufDescTable[clockHand].pageNo != pageNo) {
 		advanceClock();
@@ -151,27 +150,35 @@ void BufMgr::allocPage(File* file, PageId &pageNo, Page*& page)
 
 	// Obtain a buffer pool frame
 	FrameId bufFrame;
-	allocBuf(&bufFrame);
+	allocBuf(bufFrame);
 
 	// Insert entry into hash table
-	hashTable->insert(file, *pageNo, bufFrame);
+	hashTable->insert(file, pageNo, bufFrame);
 
 	// Set up frame
-	bufDescTable[bufFrame].Set(file, *pageNo);
+	bufDescTable[bufFrame].Set(file, pageNo);
 
 }
 
 void BufMgr::disposePage(File* file, const PageId PageNo)
 {
-	Page * toDispose = file->readPage(PageNo, false);
+	Page toDispose = file->readPage(PageNo);
+
 	// If page is in buffer pool...
-	Page * inPool = std::find(std::begin(bufPool), std::end(bufPool), *toDispose);
-	if (inPool != std::end(bufPool))
+	int indexInPool = -1;
+	for (std::uint32_t i = 0; i < numBufs; i++) {
+		if (toDispose.getFreeSpace() == bufPool[i].getFreeSpace()
+			&& toDispose.page_number() == bufPool[i].page_number()
+			&& toDispose.next_page_number() == bufPool[i].next_page_number()) {
+		indexInPool = i;
+		}
+	}
+	if (indexInPool != -1)
 	{
 		// Free page from pool
-		*inPool = null;
+		bufPool[indexInPool] = Page();
 		// Remove page from hash table
-		hashTable.remove(file, PageNo);
+		hashTable->remove(file, PageNo);
 	}
 	// Delete page from file
 	file->deletePage(PageNo);
