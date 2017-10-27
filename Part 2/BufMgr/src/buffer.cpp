@@ -98,8 +98,10 @@ void BufMgr::allocBuf(FrameId & frame)
 
 		//once victim page is found, the page at the requested FrameID (frame) is moved to the victim pages slot
 		//the requested frame is then cleared 
-		bufDescTable[clockHand].Set(bufDescTable[frame].file, bufDescTable[frame].pageNo);
-		bufDescTable[frame].Clear();
+        frame = bufDescTable[clockHand].frameNo;
+        return;
+		//bufDescTable[clockHand].Set(bufDescTable[frame].file, bufDescTable[frame].pageNo);
+		//bufDescTable[frame].Clear();
 
 
 }
@@ -107,6 +109,29 @@ void BufMgr::allocBuf(FrameId & frame)
 	
 void BufMgr::readPage(File* file, const PageId pageNo, Page*& page)
 {
+    FrameId frameNo;
+    bool found = false;
+    try {
+        hashTable->lookup(file, pageNo, frameNo);
+        unsigned int i;
+        for (i = 0; i < numBufs && !found; i++) {
+            if (bufDescTable[i].frameNo == frameNo) {
+                found = true;
+            }
+        }
+        bufDescTable[i - 1].refbit = 1;
+        bufDescTable[i - 1].pinCnt++;
+        page = &bufPool[frameNo];
+        return;
+    }
+    catch (const HashNotFoundException ex) {
+        allocBuf(frameNo);
+        bufPool[frameNo] = (*file).readPage(pageNo);
+        hashTable->insert(file, pageNo, frameNo);
+        bufDescTable[frameNo].Set(file, pageNo);
+        page = &bufPool[frameNo];
+        return;
+    }
 }
 
 
@@ -141,6 +166,29 @@ void BufMgr::unPinPage(File* file, const PageId pageNo, const bool dirty)
 
 void BufMgr::flushFile(const File* file) 
 {
+    for (unsigned int i = 0; i < numBufs; i++) {
+        
+        if (bufDescTable[i].file == file) {
+            
+            if (bufDescTable[i].pinCnt > 0) {
+                throw new PagePinnedException("Page pinned", bufDescTable[i].pageNo, bufDescTable[i].frameNo);
+            }
+            if (!bufDescTable[i].valid) {
+                throw new BadBufferException(bufDescTable[i].frameNo, bufDescTable[i].dirty, bufDescTable[i].valid, 
+                  bufDescTable[i].refbit);
+            }
+            
+            if (bufDescTable[i].dirty) {
+                FrameId frameNo = bufDescTable[i].frameNo;
+                file->writePage(const bufPool[frameNo]);
+                bufDescTable[i].dirty = 0;
+            }
+            hashTable->remove(file, bufDescTable[i].pageNo);
+            bufDescTable[i].Clear();
+        }
+        
+    }
+    
 }
 
 void BufMgr::allocPage(File* file, PageId &pageNo, Page*& page)
