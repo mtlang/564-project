@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
-//#include <stdio.h>
+#include <stdio.h>
 #include <cstring>
 #include <memory>
 #include "page.h"
@@ -88,15 +88,15 @@ int main()
     const RecordId& rid = third_page.insertRecord("world!");
     new_file.writePage(third_page);
 
+
     // Retrieve the record we just added to the third page.
     std::cout << "Third page has a new record: "
         << third_page.getRecord(rid) << "\n\n";
   }
   // new_file goes out of scope here, so file is automatically closed.
-
+  
   // Delete the file since we're done with it.
   File::remove(filename);
-
 	//This function tests buffer manager, comment this line if you don't wish to test buffer manager
 	testBufMgr();
 }
@@ -105,7 +105,6 @@ void testBufMgr()
 {
 	// create buffer manager
 	bufMgr = new BufMgr(num);
-
 	// create dummy files
   const std::string& filename1 = "test.1";
   const std::string& filename2 = "test.2";
@@ -140,11 +139,17 @@ void testBufMgr()
 	//Test buffer manager
 	//Comment tests which you do not wish to run now. Tests are dependent on their preceding tests. So, they have to be run in the following order. 
 	//Commenting  a particular test requires commenting all tests that follow it else those tests would fail.
+	std::cout << "enter t1\n";
 	test1();
+	std::cout << "enter t2\n";
 	test2();
+        std::cout << "enter t3\n";
 	test3();
+	std::cout << "enter t4\n";
 	test4();
+ 	std::cout << "enter t5\n";
 	test5();
+	std::cout << "enter t6\n";
 	test6();
 
 	//Close files before deleting them
@@ -171,7 +176,9 @@ void test1()
 	//Allocating pages in a file...
 	for (i = 0; i < num; i++)
 	{
+		std::cout << "pid[i] = " << pid[i] << "\n";
 		bufMgr->allocPage(file1ptr, pid[i], page);
+		std::cout << "pid[i] = " << pid[i] << "\n";
 		sprintf((char*)tmpbuf, "test.1 Page %d %7.1f", pid[i], (float)pid[i]);
 		rid[i] = page->insertRecord(tmpbuf);
 		bufMgr->unPinPage(file1ptr, pid[i], true);
@@ -228,10 +235,10 @@ void test2()
 		{
 			PRINT_ERROR("ERROR :: CONTENTS DID NOT MATCH");
 		}
-
+		std::cout << "up1\n";
 		bufMgr->unPinPage(file1ptr, pageno1, false);
 	}
-
+	std::cout << "before loop\n";
 	for (i = 0; i < num/3; i++) {
 		bufMgr->unPinPage(file2ptr, i+1, true);
 		bufMgr->unPinPage(file2ptr, i+1, true);

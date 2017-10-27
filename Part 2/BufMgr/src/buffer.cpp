@@ -110,18 +110,11 @@ void BufMgr::allocBuf(FrameId & frame)
 void BufMgr::readPage(File* file, const PageId pageNo, Page*& page)
 {
     FrameId frameNo;
-    bool found = false;
     try {
         hashTable->lookup(file, pageNo, frameNo);
-        unsigned int i;
-        for (i = 0; i < numBufs && !found; i++) {
-            if (bufDescTable[i].frameNo == frameNo) {
-                found = true;
-            }
-        }
-        bufDescTable[i - 1].refbit = 1;
-        bufDescTable[i - 1].pinCnt++;
-        page = &bufPool[frameNo];
+        bufDescTable[frameNo].refbit = 1;
+        bufDescTable[frameNo].pinCnt++;
+	page = &bufPool[frameNo];
         return;
     }
     catch (const HashNotFoundException ex) {
@@ -140,7 +133,7 @@ void BufMgr::unPinPage(File* file, const PageId pageNo, const bool dirty)
 	//check if page exists in bufferpool
 	FrameId clockStart = clockHand;
 	bool notFound;
-	while (bufDescTable[clockHand].pageNo != pageNo) {
+	while (bufDescTable[clockHand].pageNo != pageNo || bufDescTable[clockHand].file != file) {
 		advanceClock();
 		//loop through the buffer pool until desired page is found
 		//if the hand makes it all around it's not in the buffer pool
@@ -149,6 +142,7 @@ void BufMgr::unPinPage(File* file, const PageId pageNo, const bool dirty)
 	}
 
 	if (!notFound) {
+		//std::cout << "bufDescTable[" << clockHand << "] = " << bufDescTable[clockHand].pinCnt << "\n";
 		if (bufDescTable[clockHand].pinCnt == 0) {
 			throw new PageNotPinnedException("Page not pinned", pageNo, clockHand);
 		}
@@ -180,7 +174,7 @@ void BufMgr::flushFile(const File* file)
             
             if (bufDescTable[i].dirty) {
                 FrameId frameNo = bufDescTable[i].frameNo;
-                bufDescTable[i].file->writePage(const bufPool[frameNo]);
+                bufDescTable[i].file->writePage(bufPool[frameNo]);
                 bufDescTable[i].dirty = 0;
             }
             hashTable->remove(file, bufDescTable[i].pageNo);
@@ -195,6 +189,7 @@ void BufMgr::allocPage(File* file, PageId &pageNo, Page*& page)
 {
 	// Allocate an empty page
 	Page newPage = file->allocatePage();
+	pageNo = newPage.page_number();
 
 	// Obtain a buffer pool frame
 	FrameId bufFrame;
@@ -205,7 +200,8 @@ void BufMgr::allocPage(File* file, PageId &pageNo, Page*& page)
 
 	// Set up frame
 	bufDescTable[bufFrame].Set(file, pageNo);
-
+	bufPool[bufFrame] = newPage;
+	page = &bufPool[bufFrame];
 }
 
 void BufMgr::disposePage(File* file, const PageId PageNo)
