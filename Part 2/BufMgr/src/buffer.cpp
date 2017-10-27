@@ -180,7 +180,7 @@ void BufMgr::flushFile(const File* file)
             
             if (bufDescTable[i].dirty) {
                 FrameId frameNo = bufDescTable[i].frameNo;
-                file->writePage(const bufPool[frameNo]);
+                bufDescTable[i].file->writePage(const bufPool[frameNo]);
                 bufDescTable[i].dirty = 0;
             }
             hashTable->remove(file, bufDescTable[i].pageNo);
