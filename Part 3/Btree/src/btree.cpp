@@ -32,6 +32,42 @@ BTreeIndex::BTreeIndex(const std::string & relationName,
 		const int attrByteOffset,
 		const Datatype attrType)
 {
+	// Get name of index file
+	std::ostringstream idxStr;
+	idxStr << relationName << '.' << attrByteOffset;
+	std::string indexName = idxStr.str();
+	// Return the name
+	outIndexName = indexName;
+	
+	// If the index file exists...
+	if (file->exists(indexName)) {
+		// Open the file
+		file->openIfNeeded(false);
+	}
+	// Otherwise create the index file
+	else {
+		file = new File(indexName,true);
+	}
+
+	// Initialize fields
+	bufMgr = bufMgrIn;
+	attributeType = attrType;
+	attrByteOffest = attrByteOffset;
+
+	// Scan given relation
+	FileScan scanner = new FileScan(relationName, bufMgrIn);
+	RecordId outRid;
+	// Scan until end of file is reached
+	try {
+		while (true) {
+			scanNext(outRid);
+			// Insert found record
+			//TODO: Find key value for the record
+			void * key = 
+			insertEntry(key, outRid);
+		}
+	} catch (EndOfFileException eof) {
+	}
 
 }
 
@@ -42,6 +78,15 @@ BTreeIndex::BTreeIndex(const std::string & relationName,
 
 BTreeIndex::~BTreeIndex()
 {
+	// Clear state variables
+	scanExecuting = false;
+	nextEntry = 0;
+	currentPageNum = 0;
+	// Unpin all pinned tree pages
+	//TODO: Find pinned tree pages
+	// bufMgr->unPinPage(file,pageno,dirty);
+	// Flush index file
+	bufMgr->flushFile(file);
 }
 
 // -----------------------------------------------------------------------------
