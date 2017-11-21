@@ -1,0 +1,12 @@
+Constructor:
+Not much optimization in this method. Entries were just added as the scanner brought them in.
+Some ompimization could have been done with this, but we didn't believe that to be a priority.
+
+Deconstructor:
+All tree pages needed to be unpinned before the index file could be flushed. Because of our design choices
+in other methods, the only page that needed to be unpinned was the current page in the scan.
+
+Insert Entry:
+
+Start Scan:
+

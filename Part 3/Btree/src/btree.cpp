@@ -163,22 +163,24 @@ const void BTreeIndex::insertEntry(const void *key, const RecordId rid)
     }
     
     //find the spot in the leaf node to insert into
-    for (i = 0; i < leafLength && insertAt == -1; i++) {
-        if (i == 0) {
-            if (*key < leaf.keyArray[0]) {
-                insertAt = i;
-            }
-        }
-        else if (i == leafLength - 1) {
-            if (*key > leaf.keyArray[leafLength - 1]) {
-                insertAt = leafLength;
-            }
-        }
-        else if (*key >= leaf.keyArray[i] && *key < leaf.keyArray[i + 1]) {
-            insertAt = i + 1;
-        }
+	//check beginning of leaf
+	if (*key < leaf.keyArray[0]) {
+        insertAt = i;
     }
-    
+	//check between existing entries
+	else {
+		for (i = 0; i < leafLength-1 && insertAt == -1; i++) {
+			else if (*key >= leaf.keyArray[i] && *key < leaf.keyArray[i + 1]) {
+				insertAt = i + 1;
+			}
+		}
+    }
+	//if insertAt still isn't set, entry belongs at the end
+    if (insertAt == -1) {
+		insertAt = leafLength;
+	}
+	
+	
     //if the leaf is full, split
     if (leafLength == INTARRAYLEAFSIZE) {
         
