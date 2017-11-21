@@ -46,13 +46,13 @@ BTreeIndex::BTreeIndex(const std::string & relationName,
 	}
 	// Otherwise create the index file
 	else {
-		file = new File(indexName,true);
+		file = BlobFile.create(indexName);
 	}
 
 	// Initialize fields
 	bufMgr = bufMgrIn;
 	attributeType = attrType;
-	attrByteOffest = attrByteOffset;
+	this->attrByteOffest = attrByteOffset;
 
 	// Scan given relation
 	FileScan scanner = new FileScan(relationName, bufMgrIn);
@@ -60,13 +60,17 @@ BTreeIndex::BTreeIndex(const std::string & relationName,
 	// Scan until end of file is reached
 	try {
 		while (true) {
-			scanNext(outRid);
-			// Insert found record
-			//TODO: Find key value for the record
-			void * key = 
+			// Get record ID
+			scanner.scanNext(outRid);
+			// Find key value for the record
+			std::string sRecord = scanner.getRecord();
+			char * rec = sRecord.c_str();
+			void * key = (void *)(rec + attrByteOffest);
+			// Insert the entry
 			insertEntry(key, outRid);
 		}
 	} catch (EndOfFileException eof) {
+	// Intentionally empty, exception is caught when all records have been inserted
 	}
 
 }
@@ -83,8 +87,7 @@ BTreeIndex::~BTreeIndex()
 	nextEntry = 0;
 	currentPageNum = 0;
 	// Unpin all pinned tree pages
-	//TODO: Find pinned tree pages
-	// bufMgr->unPinPage(file,pageno,dirty);
+	bufMgr->unPinPage(file,currentPageNum,true);
 	// Flush index file
 	bufMgr->flushFile(file);
 }
