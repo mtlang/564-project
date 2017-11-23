@@ -1,12 +1,3 @@
-Constructor:
-Not much optimization in this method. Entries were just added as the scanner brought them in.
-Some ompimization could have been done with this, but we didn't believe that to be a priority.
+We tried to unpin pages as soon as they were no longer in use. Essentially, only one pin should be pinned at a time (the current page). This takes a lot of effort from the deconstructor and frees up more space in the buffer. For a range  search, we avoid unnecessarily traversing the tree again by simply examining the next value. The next value is returned if it fits the search, or an exception is thrown if it does not.
 
-Deconstructor:
-All tree pages needed to be unpinned before the index file could be flushed. Because of our design choices
-in other methods, the only page that needed to be unpinned was the current page in the scan.
-
-Insert Entry:
-
-Start Scan:
-
+If the tree were to allow duplicate values, insertEntry would need to be changed. Currently the way the program determines where within a leaf to insert a new value depends on the new value not being equal to any existing values, so incorrect behavior would occur if a new value were already in the tree. The logic would simply need to change to <= and >= to correct for this.
