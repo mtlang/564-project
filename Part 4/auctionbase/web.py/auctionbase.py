@@ -52,10 +52,7 @@ def render_template(template_name, **context):
 
 urls = ('/currtime', 'curr_time',
         '/selecttime', 'select_time',
-<<<<<<< HEAD
-=======
         '/search', 'search'
->>>>>>> 4d35fc03275122e51ad2bbba35991f3d93c00f12
         # TODO: add additional URLs here
         # first parameter => URL, second parameter => class name
         )
@@ -70,11 +67,7 @@ class curr_time:
         return render_template('curr_time.html', time = current_time)
 
 class select_time:
-<<<<<<< HEAD
-    # Aanother GET request, this time to the URL '/selecttime'
-=======
     # Another GET request, this time to the URL '/selecttime'
->>>>>>> 4d35fc03275122e51ad2bbba35991f3d93c00f12
     def GET(self):
         return render_template('select_time.html')
 
@@ -93,16 +86,6 @@ class select_time:
         ss = post_params['ss'];
         enter_name = post_params['entername']
 
-<<<<<<< HEAD
-
-        selected_time = '%s-%s-%s %s:%s:%s' % (yyyy, MM, dd, HH, mm, ss)
-        update_message = '(Hello, %s. Previously selected time was: %s.)' % (enter_name, selected_time)
-        # TODO: save the selected time as the current time in the database
-
-        # Here, we assign `update_message' to `message', which means
-        # we'll refer to it in our template as `message'
-        return render_template('select_time.html', message = update_message)
-=======
         selected_time = '%s-%s-%s %s:%s:%s' % (yyyy, MM, dd, HH, mm, ss)
         update_message = '(Hello, %s. Previously selected time was: %s.)' % (enter_name, selected_time)
         # TODO: save the selected time as the current time in the database
@@ -117,7 +100,19 @@ class search:
     #render the search page
     def GET(self):
         return render_template('search.html')
->>>>>>> 4d35fc03275122e51ad2bbba35991f3d93c00f12
+    
+    #submit the search form
+    def POST(self):
+        
+        #get the form values
+        post_params = web.input()
+        itemID = post_params['itemID']
+        userID = post_params['userID']
+        minPrice = post_params['minPrice']
+        maxPrice = post_params['maxPrice']
+        status = post_params['status']
+        
+        sqlitedb.search(itemID, userID, minPrice, maxPrice, status)
 
 ###########################################################################################
 ##########################DO NOT CHANGE ANYTHING BELOW THIS LINE!##########################
