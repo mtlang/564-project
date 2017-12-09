@@ -1,11 +1,7 @@
 import web
 
 db = web.database(dbn='sqlite',
-<<<<<<< HEAD
-        db='[YOUR SQLite DATABASE FILENAME]' #TODO: add your SQLite database filename
-=======
         db='AuctionBase' #TODO: add your SQLite database filename
->>>>>>> 4d35fc03275122e51ad2bbba35991f3d93c00f12
     )
 
 ######################BEGIN HELPER METHODS######################
@@ -36,13 +32,6 @@ def transaction():
 def getTime():
     # TODO: update the query string to match
     # the correct column and table name in your database
-<<<<<<< HEAD
-    query_string = 'select currenttime from Time'
-    results = query(query_string)
-    # alternatively: return results[0]['currenttime']
-    return results[0].currenttime # TODO: update this as well to match the
-                                  # column name
-=======
     query_string = 'select Time from CurrentTime'
     results = query(query_string)
     # alternatively: return results[0]['currenttime']
@@ -64,7 +53,6 @@ def setTime(time):
     else:
         t.commit() 
         return True
->>>>>>> 4d35fc03275122e51ad2bbba35991f3d93c00f12
 
 # returns a single item specified by the Item's ID in the database
 # Note: if the `result' list is empty (i.e. there are no items for a
