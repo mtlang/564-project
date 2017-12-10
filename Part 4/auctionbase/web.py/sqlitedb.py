@@ -161,7 +161,7 @@ def get_item_status(ItemID):
     end_time = auctionbase.string_to_time(query('select Ends from Items where ItemID = $ItemID', {'ItemID': ItemID})[0])
     buy_price = query('select Buy_Price from Items where ItemID = $ItemID', {'ItemID': ItemID})[0]
     currently = query('select currently from Items where ItemID = $ItemID', {'ItemID': ItemID})[0]
-    if (end_time >= getTime()): return 'closed'
+    if (end_time >= auctionbase.string_to_time(getTime())): return 'closed'
     if (currently >= buy_price): return 'closed'
     else: return 'open';
 
