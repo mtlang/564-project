@@ -2,7 +2,7 @@
 {% block content %}
 <h3> Search </h3> 
 
-<form method="POST" action="search" role="form" style="max-width:400px; width:100%">
+<form method="POST" id="search_form" action="search" role="form" style="max-width:400px; width:100%">
 	{% if message is defined %}
 	<div class="alert alert-warning" role="alert">{{ message }}</div>
 	{% endif %}
@@ -11,6 +11,10 @@
 	  <label for="itemID">Item ID</label>
 	  <input type="text" class="form-control" id="itemID" name="itemID" />
 	</div>
+    <div class="form-group">
+      <label for="category">Category</label>
+      <input type="text" class="form-control" id="category" name="category" />
+    </div>
 	<div class="form-group">
 	  <label for="userID">User ID</label>
 	  <input type="text" name="userID" class="form-control" id="userID" />
@@ -23,28 +27,75 @@
 	  <label for="maxPrice">Max Price</label>
 	  <input type="text" name="maxPrice" class="form-control" id="maxPrice" />
 	</div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea name="description" form="search_form" class="form-control" id="description"></textarea>
+    </div>
 	<div class="form-group">
-		<label for="status">Status &nbsp;&nbsp;</label>
-		<div class="radio-inline"><label><input type="radio" name="status" value="open">Open</label></div>
-		<div class="radio-inline"><label><input type="radio" name="status" value="close">Close</label></div>
-		<div class="radio-inline"><label><input type="radio" name="status" value="notStarted">Not Started</label></div>
-		<div class="radio-inline"><label><input type="radio" name="status" value="all" checked>All</label></div>
-	</div>
+      <label for="status">Status &nbsp;&nbsp;</label>
+	  <div class="radio-inline"><label><input type="radio" name="status" value="open">Open</label></div>
+      <div class="radio-inline"><label><input type="radio" name="status" value="close">Close</label></div>
+      <div class="radio-inline"><label><input type="radio" name="status" value="notStarted">Not Started</label></div>
+      <div class="radio-inline"><label><input type="radio" name="status" value="all" checked>All</label></div>
+	</div>    
 	<div><input type="submit" value="Start Searching!" class="btn btn-primary" /></div>
 </form>
 <h3>Result</h3>
 <ul>
+                  
 {% if search_result %}
-{% for result in search_result %}
-	{% for key in result %}
-		<div>
-			<span>{{ key|e }}</span>
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			<span>{{ result[key]|e }}</span>
-		</div>
-  	{% endfor %}
-  	<div>--------</div>
+    
+{% if (total < 15 * page - 1) %}
+{% set finish = total %}
+{% else %}
+{% set finish = 15 * page - 1 %}
+{% endif %}   
+    
+{% for n in range(15 * (page - 1), finish) %}
+    {% set result = search_result[n] %}
+	<div>
+        <span>{{ 'Name'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Name']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Item ID'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['ItemID']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Seller'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Seller_UserID']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Current Bid'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ "{0:.2f}".format(result['Currently'])|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Bids'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Number_of_Bids']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Buy Price'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Buy_Price']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Status'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Started']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Ends'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Ends']|e }}</span>
+    </div>             
+  	<div>--------</div>    
 {% endfor %}
+    <div style='text-align:center'>
+        {% if page <= 1 %}    
+        &lt; Previous              
+        {% else %}
+        {% set page = page - 1 %}
+        <a href={{"./search?page=" ~ (page - 1) ~ "&total=" ~ total }}>&lt; Previous</a>
+        {% endif %}
+    
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+    
+        {% if total <= ((15 * page) - 1) %}    
+        Next >              
+        {% else %}
+            {% set page = page + 1 %}
+        <a href="#" onclick={% set page = page + 1 %}>Next &gt;</a>
+        {% endif %} 
+    </div>
 {% else %}
 <div>No results</div>
 {% endif %}
