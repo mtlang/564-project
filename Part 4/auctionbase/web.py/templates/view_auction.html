@@ -1,0 +1,50 @@
+{% extends "app_base.html" %}
+{% block content %}
+<h3> View Auction Details </h3>
+<ul>
+
+	<div>
+        <span>{{ 'Name'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Name']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Item ID'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['ItemID']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Seller'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Seller_UserID']|e }}</span>
+    </div>
+	 <div>
+        <span>{{ 'First Bid'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['First_Bid']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Current Bid'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ "{0:.2f}".format(result['Currently'])|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Bids'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Number_of_Bids']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Buy Price'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Buy_Price']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Status'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Started']|e }}</span>
+    </div>
+    <div>
+        <span>{{ 'Ends'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Ends']|e }}</span>
+    </div>
+	<div>
+        <span>{{ 'Description'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Description']|e }}</span>
+    </div>
+	<div>
+        <span>{{ 'Categories'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ categories|e }}</span>
+    </div>
+	<div>
+        <span>{{ 'Auction Status'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ status|e }}</span>
+    </div>
+	<div>
+        <span>{{ 'Bids'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ bids|e }}</span>
+    </div>
+	<div>
+        <span>{{ 'Winner'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ winner|e }}</span>
+    </div>
+</ul>
+
+{% endblock %}
