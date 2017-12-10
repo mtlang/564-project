@@ -52,6 +52,83 @@ def setTime(time):
         t.commit() 
         return True
 
+# searches for an item given the input
+def search(itemID, category, userID, minPrice, maxPrice, status, description):
+    query_string = 'select distinct i.Name, i.ItemID, i.Seller_UserID, i.Currently, i.Number_of_Bids, i.Buy_Price, i.Started, i.Ends, '
+    query_string += 'i.Description from Items i join Categories c on i.ItemID = c.ItemID where '
+    inVars = {}
+    time = getTime()
+    
+    #put the query together using the input parameters   
+    if (itemID != ''):
+        query_string += 'i.ItemID = $itemID and '
+        inVars['itemID'] = itemID
+        
+    if (category != ''):
+        query_string += 'c.Category = $category and '
+        inVars['category'] = category
+        
+    if (userID != ''):
+        query_string += 'i.Seller_UserID = $userID and '
+        inVars['userID'] = userID
+    
+    try:
+        if (minPrice != ''):
+            minInt = int(minPrice)
+        if (maxPrice != ''):
+            maxInt = int(maxPrice)
+    except Exception as e:
+        print str(e)
+        return None
+    
+    if (minPrice != '' and maxPrice != '' and maxInt < minInt):
+        return None
+    
+    if (minPrice != ''):
+        query_string += '(i.Currently >= $minPrice or i.Buy_Price >= $minPrice) and '
+        inVars['minPrice'] = minInt
+        
+    if (maxPrice != ''):
+        query_string += '(i.Currently <= $maxPrice or i.Buy_Price <= $maxPrice) and '
+        inVars['maxPrice'] = maxInt
+        
+    if (description != ''):
+        description = '%' + description + '%'
+        query_string += 'i.Description like $description and '
+        inVars['description'] = description
+        
+    if (status != 'All'):
+        if (status == 'open'):
+            query_string += '$time >= i.Started and $time < i.Ends'
+            
+        elif (status == 'close'):
+            query_string += '$time >= i.Ends'
+            
+        elif (status == 'notStarted'):
+            query_string += '$time < i.Started'
+            
+        inVars['time'] = time
+        
+    if query_string.endswith(' and '):
+        query_string = query_string[:-5]
+    #adding where gives all results -- memory overload
+    #elif query_string.endswith(' where '):
+        #query_string = query_string[:-7]
+        
+    #query_string += ' group by i.ItemID'
+                       
+    # try to do the search
+    t = transaction()
+    try:
+        results = query(query_string, inVars)
+    except Exception as e:
+        t.rollback()
+        print str(e)
+        return None
+    else:
+        t.commit() 
+        return results
+
 # returns a single item specified by the Item's ID in the database
 # Note: if the `result' list is empty (i.e. there are no items for a
 # a given ID), this will return None!
