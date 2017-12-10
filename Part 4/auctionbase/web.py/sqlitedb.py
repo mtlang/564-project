@@ -1,5 +1,5 @@
 import web
-
+import auctionbase
 db = web.database(dbn='sqlite',
 				  db='AuctionBase' #TODO: add your SQLite database filename
 				  )
@@ -158,12 +158,11 @@ def get_item_categories(ItemID):
     return db.query('select Category from Categories where ItemID = $ItemID', {'ItemID': ItemID});
 
 def get_item_status(ItemID):
-    def get_item_status(ItemID):
-    end_time = query('select Ends from Items where ItemID = $ItemID', {'ItemID': ItemID})
+    end_time = auctionbase.string_to_time(query('select Ends from Items where ItemID = $ItemID', {'ItemID': ItemID}))
     buy_price = query('select Buy_Price from Items where ItemID = $ItemID', {'ItemID': ItemID})
     currently = query('select currently from Items where ItemID = $ItemID', {'ItemID': ItemID})
-    if (end_time >= getTime()): return 'closed because of time'
-        if (currently >= buy_price): return 'closed because of price'
+    if (end_time >= getTime()): return 'closed'
+    if (currently >= buy_price): return 'closed'
     else: return 'open';
 
 
