@@ -53,6 +53,7 @@ def render_template(template_name, **context):
 urls = ('/currtime', 'curr_time',
         '/selecttime', 'select_time',
         '/search', 'search',
+	'/view_auction', 'view_auction'
 		'/addbid', 'add_bid'
         # TODO: add additional URLs here
         # first parameter => URL, second parameter => class name
@@ -155,7 +156,18 @@ class search:
             self.page = 0
             return render_template('search.html', message = 'Error: search failed', search_results = self.results, total = self.total)
 
- 
+class view_auction:
+    def GET(self):
+        data = web.input();
+        ItemID = data.ItemID
+        self.result = sqlitedb.get_item_attributes(ItemID);
+        self.categories = sqlitedb.get_item_categories(ItemID);
+        self.status = sqlitedb.get_item_status(ItemID);
+        self.bids = sqlitedb.get_auction_bids(ItemID);
+        self.winner = sqlitedb.get_auction_winner(ItemID);
+
+        return render_template(view_auction.html, attributes=self.result, categories=self.categories,
+                               status=self.status, bids=self.bids, winner=self.winner); 
 class add_bid:
     # Another GET request, this time to the URL '/addbid'
     def GET(self):
