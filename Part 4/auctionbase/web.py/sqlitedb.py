@@ -158,11 +158,14 @@ def get_item_categories(ItemID):
     return db.query('select Category from Categories where ItemID = $ItemID', {'ItemID': ItemID});
 
 def get_item_status(ItemID):
+    def get_item_status(ItemID):
     end_time = query('select Ends from Items where ItemID = $ItemID', {'ItemID': ItemID})
     buy_price = query('select Buy_Price from Items where ItemID = $ItemID', {'ItemID': ItemID})
     currently = query('select currently from Items where ItemID = $ItemID', {'ItemID': ItemID})
-    if (end_time >= getTime() or currently >= buy_price): return 'closed'
+    if (end_time >= getTime()): return 'closed because of time'
+        if (currently >= buy_price): return 'closed because of price'
     else: return 'open';
+
 
 def get_auction_bids(ItemID):
     return db.query('select UserID, Time, Amount from Bids where ItemID = $ItemID', {'ItemID': ItemID});
