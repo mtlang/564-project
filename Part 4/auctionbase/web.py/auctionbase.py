@@ -97,9 +97,32 @@ class select_time:
         return render_template('select_time.html', message = update_message)
     
 class search:
+    
+    page = 0
+    total = -1
+    results = None
+    
     #render the search page
     def GET(self):
-        return render_template('search.html')
+        
+        #get the input parameters
+        try:
+            get_params = web.input()
+            page = get_params['page']
+            total = get_params['total']
+            print(page)
+            print(total)
+            print(self.results)
+            if page > 0:
+                self.page = page
+                self.total = total
+                print('before IF')
+                return render_template('search.html', message = 'Showing results ' + (page*15) + ' - ' + str(until) + ' of ' + str(self.total) + ' results found')
+            else:
+                return render_template('search.html', page = self.page, total = self.total)
+        except Exception as e:
+            print('here')
+            return render_template('search.html', page = self.page, total = self.total)
     
     #submit the search form
     def POST(self):
@@ -107,13 +130,31 @@ class search:
         #get the form values
         post_params = web.input()
         itemID = post_params['itemID']
+        category = post_params['category']
         userID = post_params['userID']
         minPrice = post_params['minPrice']
         maxPrice = post_params['maxPrice']
         status = post_params['status']
+        description = post_params['description']
         
-        sqlitedb.search(itemID, userID, minPrice, maxPrice, status)
+        self.results = sqlitedb.search(itemID, category, userID, minPrice, maxPrice, status, description)
+                             
+        if (self.results != None):
+            self.total = len(self.results)
+            self.page = 1
+            
+            if self.total <= 14:
+                until = self.total
+            else:
+                until = 14
+            
+            return render_template('search.html', message = 'Showing results 0 - ' + str(until) + ' of ' + str(self.total) + ' results found', search_result = self.results, total = self.total, page = self.page)
+        else:
+            self.total = -1
+            self.page = 0
+            return render_template('search.html', message = 'Error: search failed', search_results = self.results, total = self.total)
 
+        
 ###########################################################################################
 ##########################DO NOT CHANGE ANYTHING BELOW THIS LINE!##########################
 ###########################################################################################
