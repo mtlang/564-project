@@ -9,3 +9,4 @@
 /usr/class/cs145/bin/sqlite3 AuctionBase < trigger6_add.sql
 /usr/class/cs145/bin/sqlite3 AuctionBase < trigger7_add.sql
 /usr/class/cs145/bin/sqlite3 AuctionBase < trigger8_add.sql
+/usr/class/cs145/bin/sqlite3 AuctionBase < trigger9_add.sql
