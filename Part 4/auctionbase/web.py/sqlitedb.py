@@ -168,3 +168,19 @@ def get_auction_bids(ItemID):
     else:
         return db.query('select UserID from Bids where Amount = (select MAX(Amount) from Bids)')
 
+		
+def add_bid(ItemID, UserID, Price):
+	current_time = db.query('select Time from CurrentTime')
+	query_string = 'insert into Bids (ItemID, UserID, Amount, Time) values ($ItemID, $UserID, $Price, $current_time)'
+    
+    # try to add the bid
+    t = transaction()
+    try:
+        db.query(query_string, {'ItemID': ItemID, 'UserID': UserID, 'Price': Price, 'current_time': current_time})
+    except Exception as e:
+        t.rollback()
+        return False
+    else:
+        t.commit() 
+        return True
+	

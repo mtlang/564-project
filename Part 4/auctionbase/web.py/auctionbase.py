@@ -52,7 +52,8 @@ def render_template(template_name, **context):
 
 urls = ('/currtime', 'curr_time',
         '/selecttime', 'select_time',
-        '/search', 'search'
+        '/search', 'search',
+		'/addbid', 'add_bid'
         # TODO: add additional URLs here
         # first parameter => URL, second parameter => class name
         )
@@ -154,7 +155,26 @@ class search:
             self.page = 0
             return render_template('search.html', message = 'Error: search failed', search_results = self.results, total = self.total)
 
-        
+ 
+class add_bid:
+    # Another GET request, this time to the URL '/addbid'
+    def GET(self):
+        return render_template('add_bid.html')
+
+    # A POST request
+    #
+    # You can fetch the parameters passed to the URL
+    # by calling `web.input()' for **both** POST requests
+    # and GET requests
+    def POST(self):
+        post_params = web.input()
+        itemID = post_params['itemID']
+        userID = post_params['userID']
+        price = post_params['price']
+
+		result = sqlitedb.add_bid(itemID,userID,price)
+		
+        return render_template('add_bid.html', add_result = result)
 ###########################################################################################
 ##########################DO NOT CHANGE ANYTHING BELOW THIS LINE!##########################
 ###########################################################################################
