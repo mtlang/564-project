@@ -54,7 +54,7 @@
 {% for n in range(15 * (page - 1), finish) %}
     {% set result = search_result[n] %}
 	<div>
-        <span>{{ 'Name'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Name']|e }}</span>
+        <a href={{"./view_auction?ItemID=" ~ result['ItemID'] }}><span>{{ 'Name'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['Name']|e }}</span></a>
     </div>
     <div>
         <span>{{ 'Item ID'|e }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ result['ItemID']|e }}</span>
