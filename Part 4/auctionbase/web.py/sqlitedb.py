@@ -51,9 +51,6 @@ def setTime(time):
     else:
         t.commit() 
         return True
-	# close all auctions now that time elapsed
-    close_auctions_time();
-    close_auctions_price();
 
 # returns a single item specified by the Item's ID in the database
 # Note: if the `result' list is empty (i.e. there are no items for a
@@ -75,39 +72,6 @@ def query(query_string, vars = {}):
 
 #TODO: additional methods to interact with your database,
 # e.g. to update the current time
-
-def close_auctions_time():
-
-    query_string = 'select itemID from Items where Ends < $curr_time'
-    list = query(query_string, {'curr_time': getTime()});
-    for item in list:
-        t = db.transaction()
-        try:
-            db.query('delete from Items where itemID = $item', {'item': item});
-        except Exception as e:
-            t.rollback()
-            print str(e)
-            return False
-        else:
-            t.commit()
-            return True
-
-
-
-def close_auctions_price():
-    query_string = 'select itemID from Items where Currently > Buy_Price or Currnetly = Buy_Price'
-    list = query(query_string);
-    for item in list:
-        t = db.transaction()
-        try:
-            db.query('delete from Items where itemID = $item', {'item': item});
-        except Exception as e:
-            t.rollback()
-            print str(e)
-            return False
-        else:
-            t.commit()
-            return True
 
 
 def get_item_attributes(ItemID):
