@@ -59,7 +59,8 @@ def setTime(time):
         t.commit()
         return True
     # close all auctions now that time elapsed
-    close_auctions_time;
+    close_auctions_time();
+    close_auctions_price();
 
 
 # returns a single item specified by the Item's ID in the database
