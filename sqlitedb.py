@@ -129,5 +129,6 @@ def get_item_status(ItemID):
 def get_auction_bids(ItemID):
     if (get_item_status(ItemID) == 'open'):
         return db.query('select UserID, Time, Amount from Bids where ItemID = $ItemID', {'ItemID': ItemID});
-    #TODO add functionality to return winner of auction if auction is closed
+    else:
+        return db.query('select UserID from Bids where Amount = (select MAX(Amount) from Bids)')
 
