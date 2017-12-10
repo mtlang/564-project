@@ -158,7 +158,7 @@ def get_item_categories(ItemID):
     return db.query('select Category from Categories where ItemID = $ItemID', {'ItemID': ItemID});
 
 def get_item_status(ItemID):
-    end_time = auctionbase.string_to_time(query('select Ends from Items where ItemID = $ItemID', {'ItemID': ItemID}))
+    end_time = auctionbase.string_to_time(query('select Ends from Items where Amount = (select MAX(Amount) from Bids where ItemID = $ItemID)', {'ItemID': ItemID}))
     buy_price = query('select Buy_Price from Items where ItemID = $ItemID', {'ItemID': ItemID})
     currently = query('select currently from Items where ItemID = $ItemID', {'ItemID': ItemID})
     if (end_time >= getTime()): return 'closed'
