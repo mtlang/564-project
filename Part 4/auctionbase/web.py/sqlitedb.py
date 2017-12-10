@@ -155,18 +155,24 @@ def get_item_attributes(ItemID):
     return db.query('select * from Items where ItemID = $ItemID', {'ItemID' : ItemID})
 
 def get_item_categories(ItemID):
-    return db.query('select Categories from Items where ItemID = $ItemID', {'ItemID': ItemID});
+    return db.query('select Category from Categories where ItemID = $ItemID', {'ItemID': ItemID});
 
 def get_item_status(ItemID):
-    list = db.query('select Categories from Items where ItemID = $ItemID', {'ItemID': ItemID});
-    if (len(list) == 0): return 'closed';
+    end_time = query('select Ends from Items where ItemID = $ItemID', {'ItemID': ItemID})
+    buy_price = query('select Buy_Price from Items where ItemID = $ItemID', {'ItemID': ItemID})
+    currently = query('select currently from Items where ItemID = $ItemID', {'ItemID': ItemID})
+    if (end_time >= getTime() or currently >= buy_price): return 'closed'
     else: return 'open';
 
 def get_auction_bids(ItemID):
     if (get_item_status(ItemID) == 'open'):
         return db.query('select UserID, Time, Amount from Bids where ItemID = $ItemID', {'ItemID': ItemID});
     else:
-        return db.query('select UserID from Bids where Amount = (select MAX(Amount) from Bids)')
+        return 'Auction is closed'
+def get_auction_winner(ItemID):
+    if (get_item_status(ItemID) == 'closed'):
+        return db.query('select UserID from Bids where Amount = (select MAX(Amount) from Bids where ItemID = $ItemID)', {'ItemID': ItemID});
+    else: return 'Auction is still open'
 
 		
 def add_bid(ItemID, UserID, Price):
