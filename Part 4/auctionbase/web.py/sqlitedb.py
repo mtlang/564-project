@@ -165,10 +165,8 @@ def get_item_status(ItemID):
     else: return 'open';
 
 def get_auction_bids(ItemID):
-    if (get_item_status(ItemID) == 'open'):
-        return db.query('select UserID, Time, Amount from Bids where ItemID = $ItemID', {'ItemID': ItemID});
-    else:
-        return 'Auction is closed'
+    return db.query('select UserID, Time, Amount from Bids where ItemID = $ItemID', {'ItemID': ItemID});
+
 def get_auction_winner(ItemID):
     if (get_item_status(ItemID) == 'closed'):
         return db.query('select UserID from Bids where Amount = (select MAX(Amount) from Bids where ItemID = $ItemID)', {'ItemID': ItemID});
